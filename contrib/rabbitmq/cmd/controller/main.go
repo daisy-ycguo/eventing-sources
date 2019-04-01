@@ -19,8 +19,8 @@ package main
 import (
 	"log"
 
-	"github.com/knative/eventing-sources/contrib/kafka/pkg/apis"
-	controller "github.com/knative/eventing-sources/contrib/kafka/pkg/reconciler"
+	"github.com/knative/eventing-sources/contrib/rabbitmq/pkg/apis"
+	controller "github.com/knative/eventing-sources/contrib/rabbitmq/pkg/reconciler"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
