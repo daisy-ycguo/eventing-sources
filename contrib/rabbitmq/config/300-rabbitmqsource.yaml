@@ -45,11 +45,9 @@ spec:
           properties:
             bootstrapServers:
               type: string
-            topics:
+            exchangeName:
               type: string
-            rabbitMQPassword:
-              type: string
-            rabbitMQUser:
+            serviceAccountName:
               type: string
             sink:
               type: object
