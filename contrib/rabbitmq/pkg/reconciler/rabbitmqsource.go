@@ -27,11 +27,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"github.com/knative/eventing-sources/contrib/kafka/pkg/reconciler/resources"
+	"github.com/knative/eventing-sources/contrib/rabbitmq/pkg/reconciler/resources"
 
 	"github.com/knative/eventing-sources/pkg/controller/sinks"
 
-	"github.com/knative/eventing-sources/contrib/kafka/pkg/apis/sources/v1alpha1"
+	"github.com/knative/eventing-sources/contrib/rabbitmq/pkg/apis/sources/v1alpha1"
 	"github.com/knative/pkg/logging"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/apps/v1"
@@ -44,20 +44,21 @@ import (
 )
 
 const (
-	controllerAgentName = "kafka-source-controller"
-	raImageEnvVar       = "KAFKA_RA_IMAGE"
+	controllerAgentName = "rabbitmq-source-controller"
+	raImageEnvVar       = "RABBITMQ_RA_IMAGE"
 )
 
+// Add will add a provider to manager
 func Add(mgr manager.Manager) error {
 	raImage, defined := os.LookupEnv(raImageEnvVar)
 	if !defined {
 		return fmt.Errorf("required environment variable '%s' not defined", raImageEnvVar)
 	}
 
-	log.Println("Adding the Apache Kafka Source controller.")
+	log.Println("Adding the RabbitMQ Source controller.")
 	p := &sdk.Provider{
 		AgentName: controllerAgentName,
-		Parent:    &v1alpha1.KafkaSource{},
+		Parent:    &v1alpha1.RabbitMQSource{},
 		Owns:      []runtime.Object{&v1.Deployment{}},
 		Reconciler: &reconciler{
 			scheme:              mgr.GetScheme(),
@@ -82,9 +83,9 @@ func (r *reconciler) InjectClient(c client.Client) error {
 func (r *reconciler) Reconcile(ctx context.Context, object runtime.Object) error {
 	logger := logging.FromContext(ctx).Desugar()
 
-	src, ok := object.(*v1alpha1.KafkaSource)
+	src, ok := object.(*v1alpha1.RabbitMQSource)
 	if !ok {
-		logger.Error("could not find Apache Kafka source", zap.Any("object", object))
+		logger.Error("could not find RabbitMQ source", zap.Any("object", object))
 		return nil
 	}
 
@@ -110,7 +111,7 @@ func (r *reconciler) Reconcile(ctx context.Context, object runtime.Object) error
 	return nil
 }
 
-func (r *reconciler) createReceiveAdapter(ctx context.Context, src *v1alpha1.KafkaSource, sinkURI string) (*v1.Deployment, error) {
+func (r *reconciler) createReceiveAdapter(ctx context.Context, src *v1alpha1.RabbitMQSource, sinkURI string) (*v1.Deployment, error) {
 	ra, err := r.getReceiveAdapter(ctx, src)
 	if err != nil && !apierrors.IsNotFound(err) {
 		logging.FromContext(ctx).Error("Unable to get an existing receive adapter", zap.Error(err))
@@ -136,7 +137,7 @@ func (r *reconciler) createReceiveAdapter(ctx context.Context, src *v1alpha1.Kaf
 	return svc, err
 }
 
-func (r *reconciler) getReceiveAdapter(ctx context.Context, src *v1alpha1.KafkaSource) (*v1.Deployment, error) {
+func (r *reconciler) getReceiveAdapter(ctx context.Context, src *v1alpha1.RabbitMQSource) (*v1.Deployment, error) {
 	dl := &v1.DeploymentList{}
 	err := r.client.List(ctx, &client.ListOptions{
 		Namespace:     src.Namespace,
@@ -164,11 +165,11 @@ func (r *reconciler) getReceiveAdapter(ctx context.Context, src *v1alpha1.KafkaS
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func (r *reconciler) getLabelSelector(src *v1alpha1.KafkaSource) labels.Selector {
+func (r *reconciler) getLabelSelector(src *v1alpha1.RabbitMQSource) labels.Selector {
 	return labels.SelectorFromSet(getLabels(src))
 }
 
-func getLabels(src *v1alpha1.KafkaSource) map[string]string {
+func getLabels(src *v1alpha1.RabbitMQSource) map[string]string {
 	return map[string]string{
 		"knative-eventing-source":      controllerAgentName,
 		"knative-eventing-source-name": src.Name,

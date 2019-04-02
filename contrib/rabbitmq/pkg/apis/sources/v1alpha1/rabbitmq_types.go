@@ -66,17 +66,29 @@ type RabbitMQSourceNetSpec struct {
 
 // RabbitMQSourceSpec defines the desired state of the RabbitMQSource.
 type RabbitMQSourceSpec struct {
-	// Bootstrap servers are the RabbitMQ servers the consumer will connect to.
+	// RabbitMQUser is the user name, shall be moved to Net.
+	// TODO: shall be moved to Net and enable tsl
 	// +required
-	BootstrapServers string `json:"bootstrapServers"`
+	RabbitMQUser string `json:"rabbitmq_user"`
 
-	// Topic topics to consume messages from
+	// RabbitMQPassword is the password
+	// TODO: shall be moved to Net and enable tsl
 	// +required
-	Topics string `json:"topics"`
+	RabbitMQPassword string `json:"rabbitmq_password"`
 
-	// ConsumerGroupID is the consumer group ID.
+	// ContainerSourceName.
+	// TODO: shall change to RabbitMQ server IP and port
 	// +required
-	ConsumerGroup string `json:"consumerGroup"`
+	ContainerSourceName string `json:"container_source_name"`
+
+	// RABBITMQ_PORT.
+	// TODO: shall change to RabbitMQ server IP and port
+	// +required
+	RabbitMQPort string `json:"rabbitmq_port"`
+
+	// ExchangeName.
+	// +required
+	ExchangeName string `json:"exchange_name"`
 
 	Net RabbitMQSourceNetSpec `json:"net,omitempty"`
 

@@ -20,30 +20,30 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/knative/eventing-sources/contrib/kafka/pkg/apis/sources/v1alpha1"
+	"github.com/knative/eventing-sources/contrib/rabbitmq/pkg/apis/sources/v1alpha1"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestMakeReceiveAdapter(t *testing.T) {
-	src := &v1alpha1.KafkaSource{
+	src := &v1alpha1.RabbitMQSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "source-name",
 			Namespace: "source-namespace",
 		},
-		Spec: v1alpha1.KafkaSourceSpec{
+		Spec: v1alpha1.RabbitMQSourceSpec{
 			ServiceAccountName: "source-svc-acct",
 			Topics:             "topic1,topic2",
 			BootstrapServers:   "server1,server2",
 			ConsumerGroup:      "group",
-			Net: v1alpha1.KafkaSourceNetSpec{
-				SASL: v1alpha1.KafkaSourceSASLSpec{
+			Net: v1alpha1.RabbitMQSourceNetSpec{
+				SASL: v1alpha1.RabbitMQSourceSASLSpec{
 					Enable:   true,
 					User:     "user",
 					Password: "password",
 				},
-				TLS: v1alpha1.KafkaSourceTLSSpec{
+				TLS: v1alpha1.RabbitMQSourceTLSSpec{
 					Enable: true,
 				},
 			},
@@ -97,32 +97,24 @@ func TestMakeReceiveAdapter(t *testing.T) {
 							ImagePullPolicy: "Always",
 							Env: []corev1.EnvVar{
 								{
-									Name:  "KAFKA_BOOTSTRAP_SERVERS",
+									Name:  "RABBITMQ_USER",
 									Value: "server1,server2",
 								},
 								{
-									Name:  "KAFKA_TOPICS",
+									Name:  "RABBITMQ_PASSWORD",
 									Value: "topic1,topic2",
 								},
 								{
-									Name:  "KAFKA_CONSUMER_GROUP",
+									Name:  "RABBITMQ_PORT",
 									Value: "group",
 								},
 								{
-									Name:  "KAFKA_NET_SASL_ENABLE",
+									Name:  "CONTAINER_SOURCE_NAME",
 									Value: "true",
 								},
 								{
-									Name:  "KAFKA_NET_SASL_USER",
+									Name:  "EXCHANGE_NAME",
 									Value: "user",
-								},
-								{
-									Name:  "KAFKA_NET_SASL_PASSWORD",
-									Value: "password",
-								},
-								{
-									Name:  "KAFKA_NET_TLS_ENABLE",
-									Value: "true",
 								},
 								{
 									Name:  "SINK_URI",

@@ -18,21 +18,22 @@ package resources
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/knative/eventing-sources/contrib/kafka/pkg/apis/sources/v1alpha1"
+	"github.com/knative/eventing-sources/contrib/rabbitmq/pkg/apis/sources/v1alpha1"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// ReceiveAdapterArgs is the arguments
 type ReceiveAdapterArgs struct {
 	Image   string
-	Source  *v1alpha1.KafkaSource
+	Source  *v1alpha1.RabbitMQSource
 	Labels  map[string]string
 	SinkURI string
 }
 
+// MakeReceiveAdapter will create a Deployment with image rabbitmq-receive-adapter
 func MakeReceiveAdapter(args *ReceiveAdapterArgs) *v1.Deployment {
 	replicas := int32(1)
 	return &v1.Deployment{
@@ -57,37 +58,29 @@ func MakeReceiveAdapter(args *ReceiveAdapterArgs) *v1.Deployment {
 					ServiceAccountName: args.Source.Spec.ServiceAccountName,
 					Containers: []corev1.Container{
 						{
-							Name:            "receive-adapter",
+							Name:            "rabbitmq-receive-adapter",
 							Image:           args.Image,
 							ImagePullPolicy: "Always",
 							Env: []corev1.EnvVar{
 								{
-									Name:  "KAFKA_BOOTSTRAP_SERVERS",
-									Value: args.Source.Spec.BootstrapServers,
+									Name:  "RABBITMQ_USER",
+									Value: args.Source.Spec.RabbitMQUser,
 								},
 								{
-									Name:  "KAFKA_TOPICS",
-									Value: args.Source.Spec.Topics,
+									Name:  "RABBITMQ_PASSWORD",
+									Value: args.Source.Spec.RabbitMQPassword,
 								},
 								{
-									Name:  "KAFKA_CONSUMER_GROUP",
+									Name:  "RABBITMQ_PORT",
 									Value: args.Source.Spec.ConsumerGroup,
 								},
 								{
-									Name:  "KAFKA_NET_SASL_ENABLE",
-									Value: strconv.FormatBool(args.Source.Spec.Net.SASL.Enable),
+									Name:  "CONTAINER_SOURCE_NAME",
+									Value: args.Source.Spec.ContainerSourceName,
 								},
 								{
-									Name:  "KAFKA_NET_SASL_USER",
-									Value: args.Source.Spec.Net.SASL.User,
-								},
-								{
-									Name:  "KAFKA_NET_SASL_PASSWORD",
-									Value: args.Source.Spec.Net.SASL.Password,
-								},
-								{
-									Name:  "KAFKA_NET_TLS_ENABLE",
-									Value: strconv.FormatBool(args.Source.Spec.Net.TLS.Enable),
+									Name:  "EXCHANGE_NAME",
+									Value: args.Source.Spec.ExchangeName,
 								},
 								{
 									Name:  "SINK_URI",
