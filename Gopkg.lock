@@ -755,6 +755,17 @@
   version = "v1.0.3"
 
 [[projects]]
+  branch = "master"
+  digest = "1:b826e420df4fe308012a783afc31b1b4920c90a84fb73692f876a5ef1148e088"
+  name = "github.com/streadway/amqp"
+  packages = [
+    ".",
+    "internal/proto",
+  ]
+  pruneopts = "NUT"
+  revision = "16ed540749f64417a42006ad795b01c0f5d4677a"
+
+[[projects]]
   digest = "1:5622c6893f87955f945c430461d41ebf6e26498214559cbaf93d284e2c8e9047"
   name = "go.opencensus.io"
   packages = [
@@ -1428,6 +1439,7 @@
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/robfig/cron",
+    "github.com/streadway/amqp",
     "go.opencensus.io/trace",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
