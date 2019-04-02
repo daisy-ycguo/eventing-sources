@@ -18,6 +18,7 @@ package resources
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/knative/eventing-sources/contrib/rabbitmq/pkg/apis/sources/v1alpha1"
 	v1 "k8s.io/api/apps/v1"
@@ -63,29 +64,33 @@ func MakeReceiveAdapter(args *ReceiveAdapterArgs) *v1.Deployment {
 							ImagePullPolicy: "Always",
 							Env: []corev1.EnvVar{
 								{
-									Name:  "RABBITMQ_USER",
-									Value: args.Source.Spec.RabbitMQUser,
+									Name:  "RABBITMQ_NET_SASL_ENABLE",
+									Value: strconv.FormatBool(args.Source.Spec.Net.SASL.Enable),
 								},
 								{
-									Name:  "RABBITMQ_PASSWORD",
-									Value: args.Source.Spec.RabbitMQPassword,
+									Name:  "RABBITMQ_NET_SASL_USER",
+									Value: args.Source.Spec.Net.SASL.User,
+								},
+								{
+									Name:  "RABBITMQ_NET_SASL_PASSWORD",
+									Value: args.Source.Spec.Net.SASL.Password,
 								},
 								{
 									Name:  "RABBITMQ_BOOTSTRAP_SERVERS",
 									Value: args.Source.Spec.BootstrapServers,
 								},
 								{
-									Name:  "RABBITMQ_PORT",
-									Value: args.Source.Spec.ConsumerGroup,
+									Name:  "RABBITMQ_NET_TLS_ENABLE",
+									Value: strconv.FormatBool(args.Source.Spec.Net.TLS.Enable),
 								},
 								{
-									Name:  "EXCHANGE_NAME",
+									Name:  "RABBITMQ_EXCHANGE_NAME",
 									Value: args.Source.Spec.ExchangeName,
 								},
 								{
 									Name:  "SINK_URI",
 									Value: args.SinkURI,
-								}
+								},
 							},
 						},
 					},

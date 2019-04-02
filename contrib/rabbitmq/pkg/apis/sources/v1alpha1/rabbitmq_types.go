@@ -76,20 +76,16 @@ type RabbitMQSourceSpec struct {
 	// +required
 	RabbitMQPassword string `json:"rabbitmq_password"`
 
-	// ContainerSourceName.
-	// TODO: shall change to RabbitMQ server IP and port
-	// +required
-	ContainerSourceName string `json:"container_source_name"`
-
-	// RABBITMQ_PORT.
-	// TODO: shall change to RabbitMQ server IP and port
-	// +required
-	RabbitMQPort string `json:"rabbitmq_port"`
-
 	// ExchangeName.
 	// +required
 	ExchangeName string `json:"exchange_name"`
 
+	// BootstrapServers
+	// +required
+	BootstrapServers string `json:"exchange_name"`
+
+	// RabbitMQSourceNetSpec
+	// +required
 	Net RabbitMQSourceNetSpec `json:"net,omitempty"`
 
 	// Sink is a reference to an object that will resolve to a domain name to use as the sink.
