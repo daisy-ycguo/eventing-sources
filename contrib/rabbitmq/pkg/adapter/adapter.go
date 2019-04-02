@@ -17,7 +17,7 @@ limitations under the License.
 package rabbitmq
 
 import (
-	"strconv"
+	"encoding/json"
 
 	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/client"
@@ -95,20 +95,22 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 	// Connect to RabbitMQ Brocker
 	// TODO we should check if SASL is enable
 	amqpConnection := a.BootstrapServers + a.Creds.SASL.User + ":" + a.Creds.SASL.Password + "@rabbitmq/"
-	if conn, err := amqp.Dial(amqpConnection); err != nil {
+	conn, err := amqp.Dial(amqpConnection)
+	if err != nil {
 		logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
 		return err
 	}
 	defer conn.Close()
 
 	// Create a channel with the brocker
-	if ch, err := conn.Channel(); err != nil {
+	ch, err := conn.Channel()
+	if err != nil {
 		logger.Error("Failed to open a channel", zap.Error(err))
 		return err
 	}
 	defer ch.Close()
 
-	if err = ch.ExchangeDeclare(
+	err = ch.ExchangeDeclare(
 		a.ExchangeName, // name
 		"direct",       // type
 		true,           // durable
@@ -116,19 +118,21 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 		false,          // internal
 		false,          // no-wait
 		nil,            // arguments
-	); err != nil {
+	)
+	if err != nil {
 		logger.Error("Failed to declare an exchange", zap.Error(err))
 		return err
 	}
 
-	if q, err := ch.QueueDeclare(
+	q, err := ch.QueueDeclare(
 		"",    // name
 		false, // durable
 		false, // delete when unused
 		false, // exclusive
 		false, // no-wait
 		nil,   // arguments
-	); err != nil {
+	)
+	if err != nil {
 		logger.Error("Failed to declare an queue", zap.Error(err))
 		return err
 	}
@@ -138,11 +142,11 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 
 // pollLoop continuously polls from the given RabbitMQ queue until stopCh
 // emits an element.  The
-func (a *Adapter) pollLoop(ctx context.Context, ch *amqp.Channel, q *amqp.Queue, stopCh <-chan struct{}) error {
+func (a *Adapter) pollLoop(ctx context.Context, ch *amqp.Channel, q amqp.Queue, stopCh <-chan struct{}) error {
 
 	logger := logging.FromContext(ctx)
 
-	if msgs, err := ch.Consume(
+	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
 		false,  // auto ack
@@ -150,7 +154,8 @@ func (a *Adapter) pollLoop(ctx context.Context, ch *amqp.Channel, q *amqp.Queue,
 		false,  // no local
 		false,  // no wait
 		nil,    // args
-	); err != nil {
+	)
+	if err != nil {
 		logger.Error("Failed to register a consumer", zap.Error(err))
 		return err
 	}
@@ -162,15 +167,15 @@ func (a *Adapter) pollLoop(ctx context.Context, ch *amqp.Channel, q *amqp.Queue,
 			return nil
 		default:
 		}
-		for m := range msgs {
+		for msg := range msgs {
 			/*  Message structure form the queue
-			Owner:         m.ReplyTo      		--> Producer URL if needed
-			Body:          m.Body				--> Message Body
-			CorrelationID: m.CorrelationId		--> Unique ID of the message if needed
+			Owner:         msg.ReplyTo      		--> Producer URL if needed
+			Body:          msg.Body				    --> Message Body
+			CorrelationID: msg.CorrelationId		--> Unique ID of the message if needed
 
 			TODO We should also have a critical message system if there is a error
 			*/
-			a.receiveMessage(ctx, m)
+			a.receiveMessage(ctx, &msg)
 		}
 	}
 }
@@ -181,12 +186,12 @@ func (a *Adapter) postMessage(ctx context.Context, logger *zap.SugaredLogger, ms
 		Context: cloudevents.EventContextV02{
 			SpecVersion: cloudevents.CloudEventsVersionV02,
 			Type:        eventType,
-			ID:          m.CorrelationId,
+			ID:          msg.CorrelationId,
 			Time:        &types.Timestamp{Time: msg.Timestamp},
 			Source:      *types.ParseURLRef(msg.Exchange), // TODO not very sure here
-			ContentType: cloudevents.StringOfApplicationJSON()
+			ContentType: cloudevents.StringOfApplicationJSON(),
 		}.AsV02(),
-		Data: a.jsonEncode(ctx, msg.Value),
+		Data: a.jsonEncode(ctx, msg.Body),
 	}
 
 	_, err := a.client.Send(ctx, event)
@@ -196,16 +201,29 @@ func (a *Adapter) postMessage(ctx context.Context, logger *zap.SugaredLogger, ms
 // receiveMessage handles an incoming message from the RabbitMQ queue,
 // and forwards it to a Sink, calling `Delivery.Ack()` when the forwarding is
 // successful.
-func (a *Adapter) receiveMessage(ctx context.Context, m *amqp.Delivery) {
-	logger := logging.FromContext(ctx).With(zap.Any("eventID", m.MessageId)).With(zap.Any("sink", a.SinkURI))
-	logger.Debugw("Received message from RabbitMQ:", zap.Any("message", string(m.Body)))
+func (a *Adapter) receiveMessage(ctx context.Context, msg *amqp.Delivery) {
+	logger := logging.FromContext(ctx).With(zap.Any("eventID", msg.MessageId)).With(zap.Any("sink", a.SinkURI))
+	logger.Debugw("Received message from RabbitMQ:", zap.Any("message", string(msg.Body)))
 
-	err := a.postMessage(ctx, logger, m)
+	err := a.postMessage(ctx, logger, msg)
 	if err != nil {
 		logger.Infof("Event delivery failed: %s", err)
-		m.Nack(false, true) // TODO Implement priority system for message that can be drop and system that need to be requeue
+		msg.Nack(false, true) // TODO Implement priority system for message that can be drop and system that need to be requeue
 	} else {
 		logger.Debug("Message successfully posted to Sink")
-		m.Ack(false)
+		msg.Ack(false)
+	}
+}
+
+func (a *Adapter) jsonEncode(ctx context.Context, value []byte) interface{} {
+	var payload map[string]interface{}
+
+	logger := logging.FromContext(ctx)
+
+	if err := json.Unmarshal(value, &payload); err != nil {
+		logger.Info("Error unmarshalling JSON: ", zap.Error(err))
+		return value
+	} else {
+		return payload
 	}
 }
