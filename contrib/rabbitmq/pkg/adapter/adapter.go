@@ -61,7 +61,7 @@ type Adapter struct {
 	SinkURI string
 
 	// Creds to connect to RabbitMQ
-	NET AdapterNet
+	Net AdapterNet
 
 	// Client sends cloudevents to the target.
 	client client.Client
@@ -94,7 +94,7 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 
 	// Connect to RabbitMQ Brocker
 	// TODO we should check if SASL is enable
-	amqpConnection := a.BootstrapServers + a.Creds.SASL.User + ":" + a.Creds.SASL.Password + "@rabbitmq/"
+	amqpConnection := a.BootstrapServers + a.Net.SASL.User + ":" + a.Net.SASL.Password + "@rabbitmq/"
 	conn, err := amqp.Dial(amqpConnection)
 	if err != nil {
 		logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
