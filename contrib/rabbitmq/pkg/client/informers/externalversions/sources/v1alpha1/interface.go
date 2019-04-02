@@ -19,13 +19,13 @@ limitations under the License.
 package v1alpha1
 
 import (
-	internalinterfaces "github.com/knative/eventing-sources/contrib/kafka/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/knative/eventing-sources/contrib/rabbitmq/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// KafkaSources returns a KafkaSourceInformer.
-	KafkaSources() KafkaSourceInformer
+	// RabbitMQSources returns a RabbitMQSourceInformer.
+	RabbitMQSources() RabbitMQSourceInformer
 }
 
 type version struct {
@@ -39,7 +39,7 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// KafkaSources returns a KafkaSourceInformer.
-func (v *version) KafkaSources() KafkaSourceInformer {
-	return &kafkaSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// RabbitMQSources returns a RabbitMQSourceInformer.
+func (v *version) RabbitMQSources() RabbitMQSourceInformer {
+	return &rabbitMQSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

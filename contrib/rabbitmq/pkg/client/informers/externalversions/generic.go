@@ -21,7 +21,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1alpha1 "github.com/knative/eventing-sources/contrib/kafka/pkg/apis/sources/v1alpha1"
+	v1alpha1 "github.com/knative/eventing-sources/contrib/rabbitmq/pkg/apis/sources/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -53,8 +53,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=sources.eventing.knative.dev, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithResource("kafkasources"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Sources().V1alpha1().KafkaSources().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("rabbitmqsources"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Sources().V1alpha1().RabbitMQSources().Informer()}, nil
 
 	}
 
