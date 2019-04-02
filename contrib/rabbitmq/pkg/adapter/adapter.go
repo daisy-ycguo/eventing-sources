@@ -19,7 +19,6 @@ package rabbitmq
 import (
 	"strconv"
 
-	"github.com/Shopify/sarama"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/client"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/types"
