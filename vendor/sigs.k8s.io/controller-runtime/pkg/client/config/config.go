@@ -61,7 +61,7 @@ func GetConfig() (*rest.Config, error) {
 	if len(kubeconfig) > 0 {
 		return clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	}
-	// If an env variable is specified with the config location, use that
+	// If an env variable is specified with the config locaiton, use that
 	if len(os.Getenv("KUBECONFIG")) > 0 {
 		return clientcmd.BuildConfigFromFlags(masterURL, os.Getenv("KUBECONFIG"))
 	}

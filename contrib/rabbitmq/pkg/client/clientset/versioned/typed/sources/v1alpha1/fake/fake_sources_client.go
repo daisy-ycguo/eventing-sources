@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/knative/eventing-sources/contrib/kafka/pkg/client/clientset/versioned/typed/sources/v1alpha1"
+	v1alpha1 "github.com/knative/eventing-sources/contrib/rabbitmq/pkg/client/clientset/versioned/typed/sources/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
@@ -28,8 +28,8 @@ type FakeSourcesV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeSourcesV1alpha1) KafkaSources(namespace string) v1alpha1.KafkaSourceInterface {
-	return &FakeKafkaSources{c, namespace}
+func (c *FakeSourcesV1alpha1) RabbitMQSources(namespace string) v1alpha1.RabbitMQSourceInterface {
+	return &FakeRabbitMQSources{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

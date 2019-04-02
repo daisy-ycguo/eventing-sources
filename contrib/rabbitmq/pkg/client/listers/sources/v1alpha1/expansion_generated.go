@@ -18,10 +18,10 @@ limitations under the License.
 
 package v1alpha1
 
-// KafkaSourceListerExpansion allows custom methods to be added to
-// KafkaSourceLister.
-type KafkaSourceListerExpansion interface{}
+// RabbitMQSourceListerExpansion allows custom methods to be added to
+// RabbitMQSourceLister.
+type RabbitMQSourceListerExpansion interface{}
 
-// KafkaSourceNamespaceListerExpansion allows custom methods to be added to
-// KafkaSourceNamespaceLister.
-type KafkaSourceNamespaceListerExpansion interface{}
+// RabbitMQSourceNamespaceListerExpansion allows custom methods to be added to
+// RabbitMQSourceNamespaceLister.
+type RabbitMQSourceNamespaceListerExpansion interface{}
