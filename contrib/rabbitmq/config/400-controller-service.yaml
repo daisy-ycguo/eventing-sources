@@ -15,12 +15,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: kafka-controller
+  name: rabbitmq-controller
   namespace: knative-sources
   labels:
-    control-plane: kafka-controller-manager
+    control-plane: rabbitmq-controller-manager
 spec:
   selector:
-    control-plane: kafka-controller-manager
+    control-plane: rabbitmq-controller-manager
   ports:
   - port: 443

@@ -71,12 +71,12 @@ func MakeReceiveAdapter(args *ReceiveAdapterArgs) *v1.Deployment {
 									Value: args.Source.Spec.RabbitMQPassword,
 								},
 								{
-									Name:  "RABBITMQ_PORT",
-									Value: args.Source.Spec.ConsumerGroup,
+									Name:  "RABBITMQ_BOOTSTRAP_SERVERS",
+									Value: args.Source.Spec.BootstrapServers,
 								},
 								{
-									Name:  "CONTAINER_SOURCE_NAME",
-									Value: args.Source.Spec.ContainerSourceName,
+									Name:  "RABBITMQ_PORT",
+									Value: args.Source.Spec.ConsumerGroup,
 								},
 								{
 									Name:  "EXCHANGE_NAME",
@@ -85,7 +85,7 @@ func MakeReceiveAdapter(args *ReceiveAdapterArgs) *v1.Deployment {
 								{
 									Name:  "SINK_URI",
 									Value: args.SinkURI,
-								},
+								}
 							},
 						},
 					},
