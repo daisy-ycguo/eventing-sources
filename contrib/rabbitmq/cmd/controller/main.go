@@ -49,12 +49,12 @@ func main() {
 
 	log.Printf("Setting up Controller.")
 
-	// Setup Kafka Controller
+	// Setup RabbitMQ Controller
 	if err := controller.Add(mgr); err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("Starting Apache Kafka controller.")
+	log.Printf("Starting RabbitMQ controller.")
 
 	// Start the Cmd
 	log.Fatal(mgr.Start(signals.SetupSignalHandler()))
