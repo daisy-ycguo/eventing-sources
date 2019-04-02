@@ -22,7 +22,7 @@ import (
 	"os"
 	"strconv"
 
-	kafka "github.com/knative/eventing-sources/contrib/kafka/pkg/adapter"
+	rabbitmq "github.com/knative/eventing-sources/contrib/rabbitmq/pkg/adapter"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -33,13 +33,12 @@ import (
 )
 
 const (
-	envBootstrapServers = "KAFKA_BOOTSTRAP_SERVERS"
-	envTopics           = "KAFKA_TOPICS"
-	envConsumerGroup    = "KAFKA_CONSUMER_GROUP"
-	envNetSASLEnable    = "KAFKA_NET_SASL_ENABLE"
-	envNetSASLUser      = "KAFKA_NET_SASL_USER"
-	envNetSASLPassword  = "KAFKA_NET_SASL_PASSWORD"
-	envNetTLSEnable     = "KAFKA_NET_TLS_ENABLE"
+	envBootstrapServers = "RABBITMQ_BOOTSTRAP_SERVERS"
+	envNetSASLEnable    = "RABBITMQ_NET_SASL_ENABLE"
+	envNetSASLUser      = "RABBITMQ_NET_SASL_USER"
+	envNetSASLPassword  = "RABBITMQ_NET_SASL_PASSWORD"
+	envNetTLSEnable     = "RABBITMQ_NET_TLS_ENABLE"
+	envExchangeName     = "RABBITMQ_EXCHANGE_NAME"
 	envSinkURI          = "SINK_URI"
 )
 
@@ -75,18 +74,16 @@ func main() {
 		log.Fatalf("Unable to create logger: %v", err)
 	}
 
-	adapter := &kafka.Adapter{
+	adapter := &rabbitmq.Adapter{
 		BootstrapServers: getRequiredEnv(envBootstrapServers),
-		Topics:           getRequiredEnv(envTopics),
-		ConsumerGroup:    getRequiredEnv(envConsumerGroup),
 		SinkURI:          getRequiredEnv(envSinkURI),
-		Net: kafka.AdapterNet{
-			SASL: kafka.AdapterSASL{
+		Net: rabbitmq.AdapterNet{
+			SASL: rabbitmq.AdapterSASL{
 				Enable:   getOptionalBoolEnv(envNetSASLEnable),
 				User:     os.Getenv(envNetSASLUser),
 				Password: os.Getenv(envNetSASLPassword),
 			},
-			TLS: kafka.AdapterTLS{
+			TLS: rabbitmq.AdapterTLS{
 				Enable: getOptionalBoolEnv(envNetTLSEnable),
 			},
 		},
@@ -94,7 +91,7 @@ func main() {
 
 	stopCh := signals.SetupSignalHandler()
 
-	logger.Info("Starting Apache Kafka Receive Adapter...", zap.Reflect("adapter", adapter))
+	logger.Info("Starting RabbitMQ Receive Adapter...", zap.Reflect("adapter", adapter))
 	if err := adapter.Start(ctx, stopCh); err != nil {
 		logger.Fatal("failed to start adapter: ", zap.Error(err))
 	}

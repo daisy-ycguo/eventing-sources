@@ -61,7 +61,7 @@ type Adapter struct {
 	SinkURI string
 
 	// Creds to connect to RabbitMQ
-	Creds AdapterNet
+	NET AdapterNet
 
 	// Client sends cloudevents to the target.
 	client client.Client
