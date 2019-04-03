@@ -23,23 +23,21 @@ import (
 	"strconv"
 
 	rabbitmq "github.com/knative/eventing-sources/contrib/rabbitmq/pkg/adapter"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
 	"golang.org/x/net/context"
 
 	"github.com/knative/pkg/signals"
 )
 
 const (
-	envBootstrapServers = "RABBITMQ_BOOTSTRAP_SERVERS"
-	envNetSASLEnable    = "RABBITMQ_NET_SASL_ENABLE"
-	envNetSASLUser      = "RABBITMQ_NET_SASL_USER"
-	envNetSASLPassword  = "RABBITMQ_NET_SASL_PASSWORD"
-	envNetTLSEnable     = "RABBITMQ_NET_TLS_ENABLE"
-	envExchangeName     = "RABBITMQ_EXCHANGE_NAME"
-	envSinkURI          = "SINK_URI"
+	envAMQPBroker      = "RABBITMQ_AMQP_Broker"
+	envNetSASLEnable   = "RABBITMQ_NET_SASL_ENABLE"
+	envNetSASLUser     = "RABBITMQ_NET_SASL_USER"
+	envNetSASLPassword = "RABBITMQ_NET_SASL_PASSWORD"
+	envNetTLSEnable    = "RABBITMQ_NET_TLS_ENABLE"
+	envExchangeName    = "RABBITMQ_EXCHANGE_NAME"
+	envSinkURI         = "SINK_URI"
 )
 
 func getRequiredEnv(key string) string {
@@ -75,8 +73,8 @@ func main() {
 	}
 
 	adapter := &rabbitmq.Adapter{
-		BootstrapServers: getRequiredEnv(envBootstrapServers),
-		SinkURI:          getRequiredEnv(envSinkURI),
+		AMQPBroker: getRequiredEnv(envAMQPBroker),
+		SinkURI:    getRequiredEnv(envSinkURI),
 		Net: rabbitmq.AdapterNet{
 			SASL: rabbitmq.AdapterSASL{
 				Enable:   getOptionalBoolEnv(envNetSASLEnable),

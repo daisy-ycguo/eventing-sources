@@ -39,7 +39,8 @@ type AdapterSASL struct {
 	Password string
 }
 
-// TODO we should have a system to use that in the futur
+// TODO we should have a system to use that in the future
+// If TLS is not supported by amqp, we may use Kubernetes Secret
 type AdapterTLS struct {
 	Enable bool
 }
@@ -51,8 +52,10 @@ type AdapterNet struct {
 
 type Adapter struct {
 
-	// BootstrapServers is the RabbitMQ Broker URL that we're polling messages from
-	BootstrapServers string
+	// AMQP_Broker_URL is the RabbitMQ Broker URL that we're polling messages from
+	// including server and port.
+	// a sample may be: localhost:5672
+	AMQPBroker string
 
 	// RabbitMQ Exchange name
 	ExchangeName string
@@ -94,7 +97,7 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 
 	// Connect to RabbitMQ Brocker
 	// TODO we should check if SASL is enable
-	amqpConnection := a.BootstrapServers + a.Net.SASL.User + ":" + a.Net.SASL.Password + "@rabbitmq/"
+	amqpConnection := "amqp://" + a.Net.SASL.User + ":" + a.Net.SASL.Password + "@" + a.AMQPBroker + "/"
 	conn, err := amqp.Dial(amqpConnection)
 	if err != nil {
 		logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
