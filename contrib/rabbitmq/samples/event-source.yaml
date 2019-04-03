@@ -26,15 +26,15 @@ metadata:
   name: rabbitmq-source
 spec:
   #AMQPBroker: RABBITMQ_AMQP_BROKER
-  AMQPBroker: localhost:5672
+  AMQPBroker: rabbitmq:5672
   #exchangeName: RABBITMQ_EXCHANGE_NAME
   exchangeName: excha
   net:
     sasl:
       #enable: RABBITMQ_SASL_ENABLED
-      enable: false
-      user: test
-      password: test
+      enable: true
+      user: guest
+      password: guest
     tls:
       #enable: RABBITMQ_TLS_ENABLE
       enable: false

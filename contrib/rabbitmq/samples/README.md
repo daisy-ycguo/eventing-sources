@@ -21,7 +21,7 @@ This sample demonstrates how to configure, deploy, and use the RabbitMQ Event So
    - Export the `KO_DOCKER_REPO` environment variable with a value denoting the
      container registry to use.
      ```
-     export KO_DOCKER_REPO="docker.io/YOUR_REPO"
+     export KO_DOCKER_REPO="docker.io/YOUR_USER/YOUR_REPO"
      ```
 
 ### Build and Deployment
@@ -77,10 +77,11 @@ and an Event Display Service.
    ...
    ```
 
-#### Apache RabbitMQ Event Source
+#### RabbitMQ Event Source
 
 1. Modify `contrib/rabbitmq/samples/event-source.yaml` accordingly with bootstrap
    servers, topics, etc...
+  - You can also use the RabbitMQ statefulset in `contrib/rabbitmq/samples/rabbitmq-statefulset.yaml`.
 2. Build and deploy the event source.
    ```
    $ kubectl apply -f contrib/rabbitmq/samples/event-source.yaml
@@ -98,7 +99,9 @@ and an Event Display Service.
    configuration.
    ```
    $ kubectl logs rabbitmq-source-xlnhq-5544766765-dnl5s
-   {"level":"info","ts":"2019-03-19T22:31:52.689Z","caller":"receive_adapter/main.go:97","msg":"Starting RabbitMQ Receive Adapter...","adapter":{"AMQPBroker":"...","Topic":"...","ConsumerGroup":"...","Net":{"SASL":{"Enable":true,"User":"...","Password":"..."},"TLS":{"Enable":true}},"SinkURI":"http://event-display.default.svc.cluster.local/"}}
+   {"level":"info","ts":"2019-04-03T19:23:31.998Z","caller":"receive_adapter/main.go:92","msg":"Starting RabbitMQ Receive Adapter...","adapter":{"AMQPBroker":"","ExchangeName":"","SinkURI":"http://event-display.default.svc.cluster.local/","Net":{"SASL":{"Enable":true,"User":"guest","Password":"guest"},"TLS":{"Enable":false}}}}
+   {"level":"info","ts":1554319411.9983,"logger":"fallback","caller":"adapter/adapter.go:91","msg":"Starting with config: {adapter 22 0  0xc0001379d0}"}
+   {"level":"info","ts":1554319411.9983342,"logger":"fallback","caller":"adapter/adapter.go:101","msg":"Connecting to RabbitMQ on : amqp://guest:guest@rabbitmq/"}
    ```
 
 ### Verify
