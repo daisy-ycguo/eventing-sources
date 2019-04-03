@@ -80,9 +80,9 @@ type RabbitMQSourceSpec struct {
 	// +required
 	ExchangeName string `json:"exchange_name"`
 
-	// BootstrapServers
+	// AMQPBrokerURL
 	// +required
-	BootstrapServers string `json:"exchange_name"`
+	AMQPBroker string `json:"amqp_broker"`
 
 	// RabbitMQSourceNetSpec
 	// +required
