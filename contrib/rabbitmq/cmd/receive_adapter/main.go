@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	envAMQPBroker      = "RABBITMQ_AMQP_Broker"
+	envAMQPBroker      = "RABBITMQ_AMQP_BROKER"
 	envNetSASLEnable   = "RABBITMQ_NET_SASL_ENABLE"
 	envNetSASLUser     = "RABBITMQ_NET_SASL_USER"
 	envNetSASLPassword = "RABBITMQ_NET_SASL_PASSWORD"

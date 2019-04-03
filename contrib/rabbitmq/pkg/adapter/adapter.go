@@ -17,8 +17,6 @@ limitations under the License.
 package rabbitmq
 
 import (
-	"encoding/json"
-
 	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/client"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/types"
@@ -97,7 +95,9 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 
 	// Connect to RabbitMQ Brocker
 	// TODO we should check if SASL is enable
-	amqpConnection := "amqp://" + a.Net.SASL.User + ":" + a.Net.SASL.Password + "@" + a.AMQPBroker + "/"
+	amqpConnection := "amqp://" + a.Net.SASL.User + ":" + a.Net.SASL.Password + "@rabbitmq/"
+	logger.Info("Connecting to RabbitMQ on : ", amqpConnection)
+
 	conn, err := amqp.Dial(amqpConnection)
 	if err != nil {
 		logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
@@ -114,13 +114,13 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 	defer ch.Close()
 
 	err = ch.ExchangeDeclare(
-		a.ExchangeName, // name
-		"direct",       // type
-		true,           // durable
-		false,          // auto-deleted
-		false,          // internal
-		false,          // no-wait
-		nil,            // arguments
+		"knative-exchange", // name
+		"direct",           // type
+		true,               // durable
+		false,              // auto-deleted
+		false,              // internal
+		false,              // no-wait
+		nil,                // arguments
 	)
 	if err != nil {
 		logger.Error("Failed to declare an exchange", zap.Error(err))
@@ -137,6 +137,18 @@ func (a *Adapter) Start(ctx context.Context, stopCh <-chan struct{}) error {
 	)
 	if err != nil {
 		logger.Error("Failed to declare an queue", zap.Error(err))
+		return err
+	}
+
+	err = ch.QueueBind(
+		q.Name,             // queue name
+		"",                 // routing key
+		"knative-exchange", // exchange
+		false,
+		nil,
+	)
+	if err != nil {
+		logger.Error("Failed to bind the qeue to the exchange", zap.Error(err))
 		return err
 	}
 
@@ -194,7 +206,7 @@ func (a *Adapter) postMessage(ctx context.Context, logger *zap.SugaredLogger, ms
 			Source:      *types.ParseURLRef(msg.Exchange), // TODO not very sure here
 			ContentType: cloudevents.StringOfApplicationJSON(),
 		}.AsV02(),
-		Data: a.jsonEncode(ctx, msg.Body),
+		Data: msg.Body,
 	}
 
 	_, err := a.client.Send(ctx, event)
@@ -215,18 +227,5 @@ func (a *Adapter) receiveMessage(ctx context.Context, msg *amqp.Delivery) {
 	} else {
 		logger.Debug("Message successfully posted to Sink")
 		msg.Ack(false)
-	}
-}
-
-func (a *Adapter) jsonEncode(ctx context.Context, value []byte) interface{} {
-	var payload map[string]interface{}
-
-	logger := logging.FromContext(ctx)
-
-	if err := json.Unmarshal(value, &payload); err != nil {
-		logger.Info("Error unmarshalling JSON: ", zap.Error(err))
-		return value
-	} else {
-		return payload
 	}
 }

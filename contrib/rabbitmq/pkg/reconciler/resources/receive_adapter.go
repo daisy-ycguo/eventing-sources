@@ -76,7 +76,7 @@ func MakeReceiveAdapter(args *ReceiveAdapterArgs) *v1.Deployment {
 									Value: args.Source.Spec.Net.SASL.Password,
 								},
 								{
-									Name:  "RABBITMQ_AMQP_Broker",
+									Name:  "RABBITMQ_AMQP_BROKER",
 									Value: args.Source.Spec.AMQPBroker,
 								},
 								{
